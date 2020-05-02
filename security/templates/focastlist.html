@@ -2,18 +2,20 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>test my first temp</title>
+    <title>{{ perforType }}</title>
 </head>
 <body>
+    <a href="/security/" target="_blank">返回首页</a>
     <table CELLPADDING="1" cellspacing="0" border="1">
     {% for forcast in page_obj %}
-        <tr><td>证券代码</td><td><a href="/security/{{ forcast.id }}/">{{ forcast.code }}</a></td></tr>
-        <tr><td>证券代码</td><td>{{ forcast.name }}</td></tr>
+        <tr><td width="100">公司网站</td><td><a href="http://{{ forcast.code }}" target="_blank">{{ forcast.code  }}</a></td></tr>
+        <tr><td>证券名称</td><td>{{ forcast.name }}</td></tr>
+        <tr><td>公告日期</td><td>{{ forcast.annDate }}</td></tr>
         <tr><td>申万二级行业</td><td> {{ forcast.trade }}</td></tr>
         <tr><td>报告年度</td><td> {{ forcast.annPeriod }}</td></tr>
         <tr><td>业绩类型</td><td> {{ forcast.perforType }}</td></tr>
-        <tr><td>业绩预告内容</td><td> {{ forcast.perforContent }}</td></tr>
-        <tr><td>业绩报告原因</td><td> {{ forcast.changeReason }}</td></tr>
+        <tr><td height="120">业绩预告内容</td><td> {{ forcast.perforContent }}</td></tr>
+        <tr><td height="120">业绩报告原因</td><td> {{ forcast.changeReason }}</td></tr>
         <tr><td>增长上限</td><td> {{ forcast.upperLimit }}</td></tr>
         <tr><td>增长下限</td><td> {{ forcast.lowerLimit }}</td></tr>
     {% endfor %}

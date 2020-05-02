@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>投资理财导航页</title>
+</head>
+<body>
+<ul>
+    {% for perforType in all_perforType_list %}
+    <li><a href="forcast/{{ perforType.name }}" target="_blank">{{ perforType.name }}</a></li>
+    {% endfor %}
+</ul>
+</body>
+</html>

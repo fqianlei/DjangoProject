@@ -9,7 +9,7 @@
     <table CELLPADDING="1" cellspacing="0" border="1">
     {% for forcast in all_forcast_list %}
         <tr><td>证券代码</td><td><a href="/security/{{ forcast.id }}/">{{ forcast.code }}</a></td></tr>
-        <tr><td>证券代码</td><td>{{ forcast.name }}</td></tr>
+        <tr><td>证券名称</td><td>{{ forcast.name }}</td></tr>
         <tr><td>申万二级行业</td><td> {{ forcast.trade }}</td></tr>
         <tr><td>报告年度</td><td> {{ forcast.annPeriod }}</td></tr>
         <tr><td>业绩类型</td><td> {{ forcast.perforType }}</td></tr>
