@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>我的股票池</title>
+</head>
+<body>
+ <table CELLPADDING="1" cellspacing="0" border="1">
+        <tr><form action="search" method="post">
+    <td>股票名称</td>
+    <td>        <input type="text" name="name" id="name" value="">{% csrf_token %}</td>
+    <input type="submit" value="提交"></td></tr>
+
+</form>
+</table>
+</body>
+</html>
