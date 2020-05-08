@@ -75,7 +75,7 @@ def tosearch(request):
 
 def search(request):
     basicinfo_list = BasicInfo.objects.filter(name__in=[request.POST['name']])
-    paginator = Paginator(basicinfo_list, 1)
+    paginator = Paginator(basicinfo_list, 5)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     return render(request, 'security/toaddreason.html', {'page_obj': page_obj})
@@ -85,7 +85,7 @@ def toreason(request):
     #basicinfo_list = BasicInfo.objects.filter(code__in=[600066,300328])
     f = MyFavorite.objects.values_list('code',flat=True)
     basicinfo_list = BasicInfo.objects.filter(code__in=f)
-    paginator = Paginator(basicinfo_list, 1)
+    paginator = Paginator(basicinfo_list, 5)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     return render(request, 'security/toaddreason.html', {'page_obj': page_obj})
