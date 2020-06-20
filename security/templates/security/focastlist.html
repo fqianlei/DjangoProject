@@ -22,9 +22,16 @@
         <tr>
             <td>入选原因：</td><td  colspan="11"><form action="{% url 'security:addReason' %}" method="post" id="form1" target="nm" >
     <input type="hidden" name="code" id="code"  value="{{ forcast.code.code  }}">{% csrf_token %}
+             <input name="fid" id="fid"  value="{{ forcast.id  }}">
     <input style="width: 600px"  type="text" name="myReason" id="myReason" value="">
     <input id="btn3" type="submit" value="提交">
-            </form></td>
+            </form>
+
+        <form action="{% url 'security:kanguo' %}" method="post" id="form2" target="nm" >
+    <input name="fid" id="fid"  value="{{ forcast.id  }}">{% csrf_token %}
+    <input type="submit" value="看过">
+            </form>
+        </td>
         </tr>
     {% endfor %}
     </table>

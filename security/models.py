@@ -27,6 +27,7 @@ class Forecast(models.Model):
     changeReason = models.CharField(max_length=4000, null=True)
     upperLimit = models.CharField(max_length=200, null=True)
     lowerLimit = models.CharField(max_length=200, null=True)
+    kanguo = models.CharField(max_length=200, null=True)
 
 
 class PerforType(models.Model):
@@ -42,3 +43,9 @@ class MyFavorite(models.Model):
     addtime = models.DateTimeField(auto_now_add=True, null=True)
     def __str__(self):
         return self.code
+
+#存放不看的行业
+class NotTrade(models.Model):
+    trade = models.CharField(max_length=200, null=True)
+    def __str__(self):
+        return self.trade

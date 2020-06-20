@@ -14,4 +14,7 @@ urlpatterns = [
     path('toreason', views.toreason, name='toreason'),
     path('tosearch', views.tosearch, name='tosearch'),
     path('search', views.search, name='search'),
+    path('bannianbao/<perforType>', views.bannianbao, name='bannianbao'),
+    path('kanguo', views.kanguo, name='kanguo'),
+    path('deleteMyfavorate', views.deleteMyfavorate, name='deleteMyfavorate'),
 ]
