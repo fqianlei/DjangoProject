@@ -3,7 +3,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 from django.views import generic
 
-from security.models import BasicInfo, Forecast, PerforType, MyFavorite, NotTrade
+from security.models import BasicInfo, Forecast, PerforType, MyFavorite,CCTVNews
 from django.template import loader
 from django.core.paginator import Paginator
 
@@ -63,21 +63,16 @@ def forcast(request, perforType):
     page_obj = paginator.get_page(page_number)
     return render(request, 'security/focastlist.html', {'page_obj': page_obj, 'perforType': perforType})
 
-def bannianbao(request, perforType):
-    all_forcast_list = Forecast.objects.filter(annPeriod__exact='2020-06-30')
-    paginator = Paginator(all_forcast_list, 1)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-    return render(request, 'security/focastlist.html', {'page_obj': page_obj, 'perforType': perforType })
 
 def addReason(request):
     code = BasicInfo.objects.get(pk = str(request.POST['code']))
     myf = MyFavorite(code=code, myReason=request.POST['myReason'])
     myf.save()
 
-    forcasta = Forecast.objects.get(pk = str(request.POST['fid']))
-    forcasta.kanguo = '是'
-    forcasta.save()
+    if request.POST.get('fid',False):
+        forcasta = Forecast.objects.get(pk = str(request.POST['fid']))
+        forcasta.kanguo = '是'
+        forcasta.save()
 
     return HttpResponse("<script>alert('股票入选原因已经保存成功');window.opener=null;window.top.open('','_self','');window.close(this);</script>")
 
@@ -115,3 +110,11 @@ def toreason(request):
 def deleteMyfavorate(request):
     MyFavorite.objects.get(pk = request.POST['fid']).delete()
     return HttpResponse()
+
+
+def cctvnews(request):
+    cctvnews = CCTVNews.objects.all().order_by('-id')
+    paginator = Paginator(cctvnews, 4)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    return render(request, 'security/cctvnews.html', {'page_obj': page_obj})

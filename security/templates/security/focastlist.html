@@ -8,9 +8,11 @@
     <a href="/security/" target="_blank">返回首页</a>
     <table CELLPADDING="1" cellspacing="0" border="1">
     {% for forcast in page_obj %}
-        <tr><td width="8%">公司网站</td><td width="5%"><a href="http://{{ forcast.code.webSite }}" target="_blank">{{ forcast.code.code  }}</a></td>
-        <td  width="8%">证券名称</td><td width="8%">{{ forcast.name }}</td><td width="8%">公告日期</td><td width="8%">{{ forcast.annDate }}</td><td width="8%">申万二级行业</td><td width="8%"> {{ forcast.trade }}</td>
+        <tr><td width="8%">公司网站</td><td width="8%"><a href="http://{{ forcast.code.webSite }}" target="_blank">{{ forcast.code.code  }}</a></td>
+        <td  width="8%">证券名称</td><td width="8%">{{ forcast.name }}</td><td width="8%">公告日期</td><td width="8%">{{ forcast.annDate }}</td><td width="8%">行业</td><td width="8%"> {{ forcast.trade }}</td>
         <td width="8%">报告年度</td><td> {{ forcast.annPeriod }}</td><td width="8%">业绩类型</td><td width="15%"> {{ forcast.perforType }}</td></tr>
+        <tr><td>地域</td><td>{{ forcast.code.province }}.{{ forcast.code.city }}</td><td>市场类型</td><td>{{ forcast.code.market }}</td><td>经营范围</td><td colspan="7">{{ forcast.code.business_scope }}</td></tr>
+        <tr><td>公司介绍</td><td colspan="11">{{ forcast.code.introduction }}</td></tr>
         <tr><td height="120">业绩预告内容</td><td colspan="11"> {{ forcast.perforContent }}</td></tr>
         <tr><td height="120">业绩报告原因</td><td colspan="11"> {{ forcast.changeReason }}</td></tr>
         <tr><td>历史入选原因</td><td colspan="11"> <table CELLPADDING="1" cellspacing="0" border="1">

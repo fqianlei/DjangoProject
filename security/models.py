@@ -6,9 +6,34 @@ from django.db import models
 # Create your models here.
 
 class BasicInfo(models.Model):
-    code = models.CharField(primary_key=True, max_length=20)
-    name = models.CharField(max_length=20)
-    webSite = models.CharField(max_length=100, null=True)
+    code = models.CharField(primary_key=True, max_length=20) #股票代码 600006
+    ts_code = models.CharField(max_length=20, null=True) #股票简称  # 股票代码 600006.SH'
+    name = models.CharField(max_length=20) #股票简称
+    webSite = models.CharField(max_length=100, null=True)# 网站
+    area = models.CharField(max_length=100, null=True) # 所在地域
+    industry = models.CharField(max_length=100, null=True)# 所属行业
+    fullname = models.CharField(max_length=100, null=True)#股票全称
+    enname = models.CharField(max_length=100, null=True)#英文全称
+    market = models.CharField(max_length=100, null=True)#市场类型 （主板/中小板/创业板/科创板）
+    exchange = models.CharField(max_length=100, null=True)#交易所代码  交易所 SSE上交所 SZSE深交所 HKEX港交所(未上线)
+    curr_type = models.CharField(max_length=100, null=True)#交易货币
+    list_status = models.CharField(max_length=100, null=True)#上市状态： L上市 D退市 P暂停上市
+    list_date = models.CharField(max_length=100, null=True)#上市日期
+    delist_date = models.CharField(max_length=100, null=True)#退市日期
+    is_hs = models.CharField(max_length=100, null=True)#是否沪深港通标的，N否 H沪股通 S深股通
+    chairman = models.CharField(max_length=100, null=True)#法人代表
+    manager = models.CharField(max_length=100, null=True)#总经理
+    secretary = models.CharField(max_length=100, null=True)#董秘
+    reg_capital = models.CharField(max_length=100, null=True)#注册资本
+    setup_date = models.CharField(max_length=100, null=True)#注册日期
+    province = models.CharField(max_length=100, null=True)#所在省份
+    city = models.CharField(max_length=100, null=True)#所在城市
+    introduction = models.CharField(max_length=100, null=True)#公司介绍
+    email = models.CharField(max_length=100, null=True)#电子邮件
+    office = models.CharField(max_length=100, null=True)#办公室
+    employees = models.CharField(max_length=100, null=True)#员工人数
+    main_business = models.CharField(max_length=100, null=True)#主要业务及产品
+    business_scope = models.CharField(max_length=100, null=True)  # 经营范围
 
     def __str__(self):
         return self.code
@@ -28,6 +53,7 @@ class Forecast(models.Model):
     upperLimit = models.CharField(max_length=200, null=True)
     lowerLimit = models.CharField(max_length=200, null=True)
     kanguo = models.CharField(max_length=200, null=True)
+    addtime = models.DateTimeField(auto_now_add=True, null=True)
 
 
 class PerforType(models.Model):
@@ -49,3 +75,9 @@ class NotTrade(models.Model):
     trade = models.CharField(max_length=200, null=True)
     def __str__(self):
         return self.trade
+
+
+class CCTVNews(models.Model):
+    date = models.CharField(max_length=200)
+    title = models.CharField(max_length=200)
+    content = models.CharField(max_length=5000)
