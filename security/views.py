@@ -1,67 +1,39 @@
 from django.shortcuts import get_object_or_404, render
 from django.http import HttpResponse, HttpResponseRedirect
-from django.urls import reverse
-from django.views import generic
-
-from security.models import BasicInfo, Forecast, PerforType, MyFavorite,CCTVNews
+from django.db import connection
+from security.models import BasicInfo, Forecast, MyFavorite,CCTVNews
 from django.template import loader
 from django.core.paginator import Paginator
 
 # Create your views here.  m = MyFavorite.objects.values('code')
 #f = MyFavorite.objects.values_list('code',flat=True)
 """
-def index(request):
-    all_perforType_list = PerforType.objects.all()
-    context = {
-        'all_perforType_list': all_perforType_list
-    }
-    return render(request, 'index.html', context)
-"""
-
 
 class IndexView(generic.ListView):
     context_object_name = 'all_perforType_list'
     model = PerforType
-    template_name = 'security/index.html'
-
-
-def allsecurity(request):
-    all_security_list = BasicInfo.objects.all()
-    template = loader.get_template('security/allsecurity.html')
+    template_name = 'index.html'
+"""
+def index(request):
+    with connection.cursor() as cursor:
+        context_object_name = cursor.execute('''select f.perforType,count(id),notkanguo.newp from security_forecast f
+                    left join (select ff.perforType,count(ff.id) newp from security_forecast ff where ff.kanguo is null group  by ff.perforType) notkanguo on notkanguo.perforType = f.perforType group by f.perforType''').fetchall()
+    print(context_object_name)
     context = {
-        'all_security_list': all_security_list
+        'context_object_name': context_object_name,
     }
-    return HttpResponse(template.render(context, request))
-
-
-def allForcast(request):
-    all_forcast_list = Forecast.objects.all()
-    # template = loader.get_template('allforcast.html')
-    context = {
-        'all_forcast_list': all_forcast_list
-    }
-    # return HttpResponse(template.render(context,request))
-    return render(request, 'security/allforcast.html', context)
-
-
-def allForcastPage(request):
-    all_forcast_list = Forecast.objects.all()
-    paginator = Paginator(all_forcast_list, 1)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-    return render(request, 'security/focastlist.html', {'page_obj': page_obj})
+    return render(request, 'index.html', context)
 
 
 def forcast(request, perforType):
     #all_forcast_list = Forecast.objects.filter(perforType__exact=perforType,kanguo=None,trade).order_by('-annDate')
     all_forcast_list = Forecast.objects.raw('''select * from security_forecast f 
-    where f.trade not in (select n.trade from security_nottrade n) 
-    and f.kanguo is null and perforType=%s order by f.annDate desc''',[perforType])
-    paginator = Paginator(all_forcast_list, 1)
+    where f.kanguo is null and perforType=%s order by f.annDate desc''',[perforType])
+    paginator = Paginator(all_forcast_list, 10)
 
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
-    return render(request, 'security/focastlist.html', {'page_obj': page_obj, 'perforType': perforType})
+    return render(request, 'focastlist.html', {'page_obj': page_obj, 'perforType': perforType})
 
 
 def addReason(request):
@@ -84,18 +56,18 @@ def kanguo(request):
 
 
 def toAddReason(request):
-    return render(request, 'security/toaddreason.html')
+    return render(request, 'toaddreason.html')
 
 
 def tosearch(request):
-    return render(request, 'security/tosearch.html')
+    return render(request, 'tosearch.html')
 
 def search(request):
     basicinfo_list = BasicInfo.objects.filter(name__in=[request.POST['name']])
     paginator = Paginator(basicinfo_list, 5)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
-    return render(request, 'security/toaddreason.html', {'page_obj': page_obj})
+    return render(request, 'toaddreason.html', {'page_obj': page_obj})
 
 
 def toreason(request):
@@ -105,7 +77,7 @@ def toreason(request):
     paginator = Paginator(basicinfo_list, 7)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
-    return render(request, 'security/toaddreason.html', {'page_obj': page_obj})
+    return render(request, 'toaddreason.html', {'page_obj': page_obj})
 
 def deleteMyfavorate(request):
     MyFavorite.objects.get(pk = request.POST['fid']).delete()
@@ -117,4 +89,4 @@ def cctvnews(request):
     paginator = Paginator(cctvnews, 4)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
-    return render(request, 'security/cctvnews.html', {'page_obj': page_obj})
+    return render(request, 'cctvnews.html', {'page_obj': page_obj})

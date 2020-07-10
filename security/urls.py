@@ -3,11 +3,14 @@ from django.urls import path
 from . import views
 
 app_name = 'security'
-urlpatterns = [
-    path('', views.IndexView.as_view(), name='index'),
+
+'''    path('', views.IndexView.as_view(), name='index'),
+path('allForcastPage', views.allForcastPage, name='allForcastPage'),
     path('allsecurity', views.allsecurity, name='allsecurity'),
     path('allforecast', views.allForcast, name='allForcast'),
-    path('allForcastPage', views.allForcastPage, name='allForcastPage'),
+'''
+urlpatterns = [
+    path('', views.index, name='index'),
     path('forcast/<perforType>', views.forcast, name='forcast'),
     path('addReason', views.addReason, name='addReason'),
     path('toaddreason', views.toAddReason, name='toaddreason'),

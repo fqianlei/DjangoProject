@@ -56,12 +56,6 @@ class Forecast(models.Model):
     addtime = models.DateTimeField(auto_now_add=True, null=True)
 
 
-class PerforType(models.Model):
-    name = models.CharField(max_length=20)
-
-    def __str__(self):
-        return self.name
-
 
 class MyFavorite(models.Model):
     code = models.ForeignKey(BasicInfo, on_delete=models.DO_NOTHING, null=True, db_column='code')
@@ -70,11 +64,6 @@ class MyFavorite(models.Model):
     def __str__(self):
         return self.code
 
-#存放不看的行业
-class NotTrade(models.Model):
-    trade = models.CharField(max_length=200, null=True)
-    def __str__(self):
-        return self.trade
 
 
 class CCTVNews(models.Model):
