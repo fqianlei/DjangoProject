@@ -1,9 +1,12 @@
+import datetime
+
 from django.shortcuts import get_object_or_404, render
 from django.http import HttpResponse, HttpResponseRedirect
 from django.db import connection
 from security.models import BasicInfo, Forecast, MyFavorite,CCTVNews
 from django.template import loader
 from django.core.paginator import Paginator
+import openpyxl
 
 # Create your views here.  m = MyFavorite.objects.values('code')
 #f = MyFavorite.objects.values_list('code',flat=True)
@@ -18,7 +21,6 @@ def index(request):
     with connection.cursor() as cursor:
         context_object_name = cursor.execute('''select f.perforType,count(id),notkanguo.newp from security_forecast f
                     left join (select ff.perforType,count(ff.id) newp from security_forecast ff where ff.kanguo is null group  by ff.perforType) notkanguo on notkanguo.perforType = f.perforType group by f.perforType''').fetchall()
-    print(context_object_name)
     context = {
         'context_object_name': context_object_name,
     }
@@ -90,3 +92,32 @@ def cctvnews(request):
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     return render(request, 'cctvnews.html', {'page_obj': page_obj})
+
+def insertForcast(request):
+    wb = openpyxl.load_workbook('D:\业绩预告.xlsx')
+    sheet = wb.worksheets[0]
+    rows = sheet.max_row
+
+    for i in range(2, rows):
+        annDate = sheet['A' + str(i)].value
+        code = sheet['B' + str(i)].value
+        annPeriod = sheet['E' + str(i)].value
+        perforType = sheet['F' + str(i)].value
+        with connection.cursor() as cursor:
+            context_object_name = cursor.execute('select * from security_forecast where annDate=%s and code=%s and annPeriod=%s and perforType=%s',[annDate,code,annPeriod,perforType]).fetchone()
+            if context_object_name:
+                pass
+            else:
+                name = sheet['C' + str(i)].value
+                trade = sheet['D' + str(i)].value
+                perforContent = sheet['G' + str(i)].value
+                changeReason = sheet['H' + str(i)].value
+                upperLimit = sheet['I' + str(i)].value
+                lowerLimit = sheet['J' + str(i)].value
+                sheetForcast = [annDate,code,name,trade,annPeriod,perforType,perforContent,changeReason,upperLimit,lowerLimit,datetime.datetime.now()]
+                print(sheetForcast)
+                with connection.cursor() as cursor:
+                    context_object_name = cursor.execute('insert into security_forecast (annDate,code,name,trade,annPeriod,perforType,perforContent,changeReason,upperLimit,lowerLimit,addtime) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)',sheetForcast)
+
+    return HttpResponse("<script>alert('此股票已保存看过记录');window.opener=null;window.top.open('','_self','');window.close(this);</script>")
+

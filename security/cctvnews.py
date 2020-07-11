@@ -18,6 +18,7 @@ pro = ts.pro_api()
 data = pro.cctv_news(date = yesterday )
 train_data = np.array(data)  # 先将数据框转换为数组
 train_data_list = train_data.tolist()  # 其次转换为列表
+print(train_data_list)
 c.executemany('''
     INSERT INTO security_cctvnews (date,title,content) 
     VALUES (?,?,?)''', train_data_list)

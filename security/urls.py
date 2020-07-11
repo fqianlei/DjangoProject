@@ -20,4 +20,5 @@ urlpatterns = [
     path('kanguo', views.kanguo, name='kanguo'),
     path('deleteMyfavorate', views.deleteMyfavorate, name='deleteMyfavorate'),
     path('cctvnews', views.cctvnews, name='cctvnews'),
+    path('insertForcast', views.insertForcast, name='insertForcast'),
 ]

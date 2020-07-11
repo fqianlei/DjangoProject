@@ -1,5 +1,5 @@
 from datetime import datetime
-
+from django.utils import timezone
 from django.db import models
 
 
@@ -47,13 +47,12 @@ class Forecast(models.Model):
     trade = models.CharField(max_length=200, null=True)
     annPeriod = models.CharField(max_length=200)
     perforType = models.CharField(max_length=200, null=True)
-    perforType = models.CharField(max_length=200, null=True)
     perforContent = models.CharField(max_length=4000, null=True)
     changeReason = models.CharField(max_length=4000, null=True)
     upperLimit = models.CharField(max_length=200, null=True)
     lowerLimit = models.CharField(max_length=200, null=True)
     kanguo = models.CharField(max_length=200, null=True)
-    addtime = models.DateTimeField(auto_now_add=True, null=True)
+    addtime = models.DateTimeField(default = timezone.now, null=True)
 
 
 
@@ -63,6 +62,7 @@ class MyFavorite(models.Model):
     addtime = models.DateTimeField(auto_now_add=True, null=True)
     def __str__(self):
         return self.code
+
 
 
 
