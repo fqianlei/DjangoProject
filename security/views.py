@@ -1,12 +1,13 @@
 import datetime
-
-from django.shortcuts import get_object_or_404, render
-from django.http import HttpResponse, HttpResponseRedirect
+from datetime import date
+import tushare as ts
+from django.shortcuts import render
+from django.http import HttpResponse
 from django.db import connection
 from security.models import BasicInfo, Forecast, MyFavorite,CCTVNews
-from django.template import loader
 from django.core.paginator import Paginator
 import openpyxl
+import numpy as np
 
 # Create your views here.  m = MyFavorite.objects.values('code')
 #f = MyFavorite.objects.values_list('code',flat=True)
@@ -31,7 +32,7 @@ def forcast(request, perforType):
     #all_forcast_list = Forecast.objects.filter(perforType__exact=perforType,kanguo=None,trade).order_by('-annDate')
     all_forcast_list = Forecast.objects.raw('''select * from security_forecast f 
     where f.kanguo is null and perforType=%s order by f.annDate desc''',[perforType])
-    paginator = Paginator(all_forcast_list, 10)
+    paginator = Paginator(all_forcast_list, 15)
 
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
@@ -87,6 +88,23 @@ def deleteMyfavorate(request):
 
 
 def cctvnews(request):
+    yesterday = str(date.today() - datetime.timedelta(days=1)).replace('-', '')
+    with connection.cursor() as cursor:
+        yesnews = cursor.execute('select * from security_cctvnews where date=%s',[yesterday]).fetchone()
+        if yesnews:
+            print("新闻已存在，无需重复添加")
+        else:
+            ts.set_token('619aac806adb72235ee6feb086f2cbb17cdeb4c85322e75c4f2f7e5d')
+            pro = ts.pro_api()
+            data = pro.cctv_news(date=yesterday)
+            train_data = np.array(data)  # 先将数据框转换为数组
+            train_data_list = train_data.tolist()  # 其次转换为列表
+            #print(train_data_list)
+            for i in range(len(train_data_list)):
+                cctv =CCTVNews(date=train_data_list[i][0],title=train_data_list[i][1],content=train_data_list[i][2],)
+                print('添加第',i,'条新闻')
+                cctv.save()
+
     cctvnews = CCTVNews.objects.all().order_by('-id')
     paginator = Paginator(cctvnews, 4)
     page_number = request.GET.get('page')
@@ -97,7 +115,7 @@ def insertForcast(request):
     wb = openpyxl.load_workbook('D:\业绩预告.xlsx')
     sheet = wb.worksheets[0]
     rows = sheet.max_row
-
+    daoruhang = 0
     for i in range(2, rows):
         annDate = sheet['A' + str(i)].value
         code = sheet['B' + str(i)].value
@@ -115,9 +133,10 @@ def insertForcast(request):
                 upperLimit = sheet['I' + str(i)].value
                 lowerLimit = sheet['J' + str(i)].value
                 sheetForcast = [annDate,code,name,trade,annPeriod,perforType,perforContent,changeReason,upperLimit,lowerLimit,datetime.datetime.now()]
-                print(sheetForcast)
+                daoruhang=daoruhang+1
                 with connection.cursor() as cursor:
-                    context_object_name = cursor.execute('insert into security_forecast (annDate,code,name,trade,annPeriod,perforType,perforContent,changeReason,upperLimit,lowerLimit,addtime) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)',sheetForcast)
-
-    return HttpResponse("<script>alert('此股票已保存看过记录');window.opener=null;window.top.open('','_self','');window.close(this);</script>")
+                    print(code)
+                    cursor.execute('insert into security_forecast (annDate,code,name,trade,annPeriod,perforType,perforContent,changeReason,upperLimit,lowerLimit,addtime) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)',sheetForcast)
+    print('本次共导入',daoruhang , '条业绩预告')
+    return HttpResponse("<script>alert('数据导入成功');window.opener=null;window.top.open('','_self','');window.close(this);</script>")
 
