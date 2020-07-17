@@ -17,8 +17,8 @@ urlpatterns = [
     path('toreason', views.toreason, name='toreason'),
     path('tosearch', views.tosearch, name='tosearch'),
     path('search', views.search, name='search'),
-    path('kanguo', views.kanguo, name='kanguo'),
     path('deleteMyfavorate', views.deleteMyfavorate, name='deleteMyfavorate'),
     path('cctvnews', views.cctvnews, name='cctvnews'),
     path('insertForcast', views.insertForcast, name='insertForcast'),
+    path('readByline', views.readByline, name='readByline'),
 ]

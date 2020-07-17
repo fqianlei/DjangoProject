@@ -38,24 +38,20 @@ def forcast(request, perforType):
     page_obj = paginator.get_page(page_number)
     return render(request, 'focastlist.html', {'page_obj': page_obj, 'perforType': perforType})
 
+#def newfocast(request, perforType):
+
+
+
 
 def addReason(request):
-    code = BasicInfo.objects.get(pk = str(request.POST['code']))
-    myf = MyFavorite(code=code, myReason=request.POST['myReason'])
-    myf.save()
-
-    if request.POST.get('fid',False):
-        forcasta = Forecast.objects.get(pk = str(request.POST['fid']))
-        forcasta.kanguo = '是'
-        forcasta.save()
-
-    return HttpResponse("<script>alert('股票入选原因已经保存成功');window.opener=null;window.top.open('','_self','');window.close(this);</script>")
-
-def kanguo(request):
+    if len(request.POST['myReason'])>2:
+        code = BasicInfo.objects.get(pk=str(request.POST['code']))
+        myf = MyFavorite(code=code, myReason=request.POST['myReason'])
+        myf.save()
     forcasta = Forecast.objects.get(pk = str(request.POST['fid']))
     forcasta.kanguo = '是'
     forcasta.save()
-    return HttpResponse("<script>alert('此股票已保存看过记录');window.opener=null;window.top.open('','_self','');window.close(this);</script>")
+    return HttpResponse("<script>alert('保存成功');window.opener=null;window.top.open('','_self','');window.close(this);</script>")
 
 
 def toAddReason(request):
@@ -121,22 +117,65 @@ def insertForcast(request):
         code = sheet['B' + str(i)].value
         annPeriod = sheet['E' + str(i)].value
         perforType = sheet['F' + str(i)].value
+        name = sheet['C' + str(i)].value
         with connection.cursor() as cursor:
             context_object_name = cursor.execute('select * from security_forecast where annDate=%s and code=%s and annPeriod=%s and perforType=%s',[annDate,code,annPeriod,perforType]).fetchone()
             if context_object_name:
                 pass
             else:
-                name = sheet['C' + str(i)].value
-                trade = sheet['D' + str(i)].value
-                perforContent = sheet['G' + str(i)].value
-                changeReason = sheet['H' + str(i)].value
-                upperLimit = sheet['I' + str(i)].value
-                lowerLimit = sheet['J' + str(i)].value
-                sheetForcast = [annDate,code,name,trade,annPeriod,perforType,perforContent,changeReason,upperLimit,lowerLimit,datetime.datetime.now()]
-                daoruhang=daoruhang+1
-                with connection.cursor() as cursor:
-                    print(code)
-                    cursor.execute('insert into security_forecast (annDate,code,name,trade,annPeriod,perforType,perforContent,changeReason,upperLimit,lowerLimit,addtime) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)',sheetForcast)
+                searchname = cursor.execute('select name from security_basicinfo where code=%s',[code]).fetchone()
+                if searchname:
+                    # cursor.execute('insert into security_basicinfo (code,name) VALUES (%s,%s)', [code,'test'])
+                    trade = sheet['D' + str(i)].value
+                    perforContent = sheet['G' + str(i)].value
+                    changeReason = sheet['H' + str(i)].value
+                    upperLimit = sheet['I' + str(i)].value
+                    lowerLimit = sheet['J' + str(i)].value
+                    sheetForcast = [annDate, code, name, trade, annPeriod, perforType, perforContent, changeReason,
+                                    upperLimit, lowerLimit, datetime.datetime.now()]
+                    daoruhang = daoruhang + 1
+                    with connection.cursor() as cursor:
+                        cursor.execute('insert into security_forecast (annDate,code,name,trade,annPeriod,perforType,perforContent,changeReason,upperLimit,lowerLimit,addtime) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)',sheetForcast)
+                        #cursor.execute('delete  from security_forecast where  code not in (select code from security_basicinfo)')
+
+                else:
+                    pass
+
     print('本次共导入',daoruhang , '条业绩预告')
+
+#导入ROE等内容    """
+
+    wb = openpyxl.load_workbook('D:\ROE等导入.xlsx')
+    sheet = wb.worksheets[0]
+    rows = sheet.max_row
+    daoruhang = 0
+    for i in range(2, rows):
+        code = sheet['B' + str(i)].value
+        roe = sheet['C' + str(i)].value
+        dfql = sheet['D' + str(i)].value
+        efql = sheet['E' + str(i)].value
+        ffql = sheet['F' + str(i)].value
+        gfql = sheet['G' + str(i)].value
+        hfql = sheet['H' + str(i)].value
+        ifql = sheet['I' + str(i)].value
+        jfql = sheet['J' + str(i)].value
+        kfql = sheet['K' + str(i)].value
+        lfql = sheet['L' + str(i)].value
+        daoruhang = daoruhang + 1
+        sheetForcast = [roe,dfql,efql,ffql,gfql,hfql,ifql,jfql,kfql,lfql,code]
+        with connection.cursor() as cursor:
+            cursor.execute('update security_basicinfo set roe=%s,dfql=%s,efql = %s,ffql = %s,gfql =%s,hfql =%s,ifql =%s,jfql =%s,kfql =%s,lfql =%s where code =%s',sheetForcast)
+    print('本次更新',daoruhang , '条ROE信息')
+
+
     return HttpResponse("<script>alert('数据导入成功');window.opener=null;window.top.open('','_self','');window.close(this);</script>")
 
+def readByline(request):
+    with connection.cursor() as cursor:
+        context_object_name = cursor.execute('''select b.industry,b.code,b.name,b.webSite,m.myReason,m.addtime,b.area,b.city,b.market,b.list_date   from security_basicinfo b
+join security_myfavorite m on m.code=b.code
+order by b.industry,b.code''').fetchall()
+    context = {
+            'context_object_name': context_object_name,
+        }
+    return render(request, 'readByline.html', context)

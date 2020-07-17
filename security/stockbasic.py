@@ -9,7 +9,7 @@ import pandas as pd
 import sqlite3
 
 
-conn = sqlite3.connect('D:\PycharmProjects\DjangoProject\db.sqlite3')
+conn = sqlite3.connect('C:\DjangoProject\db.sqlite3')
 c = conn.cursor()
 c.execute("delete from security_basicinfo ")
 conn.commit()
@@ -25,6 +25,7 @@ def insertBasic(exchange):
         INSERT INTO security_basicinfo (ts_code,code,name,area,industry,fullname,enname,market,exchange,curr_type,list_status,
         list_date,delist_date,is_hs) 
         VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)''', train_data_list)
+    print(train_data_list[0][0])
     conn.commit()
 
 insertBasic('SSE')
@@ -34,8 +35,8 @@ def updateBasic(exchange):
     data = pro.stock_company(exchange=exchange,fields='ts_code,chairman,manager,secretary,reg_capital,setup_date,province,city,introduction,website,email,office,employees,main_business,business_scope')
     train_data = np.array(data)  # 先将数据框转换为数组
     train_data_list = train_data.tolist()  # 其次转换为列表
-    print(len(train_data_list))
     for i in range(len(train_data_list)):
+
         c.execute('''
         update security_basicinfo set chairman=?,manager=?,secretary=?,reg_capital=?,setup_date=?,
         province=?,city=?,introduction=?,webSite=?,email=?,office=?,employees=?,main_business=?,business_scope=?  
@@ -44,6 +45,7 @@ def updateBasic(exchange):
              train_data_list[i][5], train_data_list[i][6], train_data_list[i][7], train_data_list[i][8],
              train_data_list[i][9], train_data_list[i][10], train_data_list[i][11], train_data_list[i][12],
              train_data_list[i][13],train_data_list[i][14],train_data_list[i][0]])
+        #print(train_data_list[i][0][0:6])
         conn.commit()
 
 updateBasic('SSE')

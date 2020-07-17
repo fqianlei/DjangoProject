@@ -8,7 +8,7 @@ from django.db import models
 class BasicInfo(models.Model):
     code = models.CharField(primary_key=True, max_length=20) #股票代码 600006
     ts_code = models.CharField(max_length=20, null=True) #股票简称  # 股票代码 600006.SH'
-    name = models.CharField(max_length=20) #股票简称
+    name = models.CharField(max_length=20, null=True) #股票简称
     webSite = models.CharField(max_length=100, null=True)# 网站
     area = models.CharField(max_length=100, null=True) # 所在地域
     industry = models.CharField(max_length=100, null=True)# 所属行业
@@ -34,6 +34,17 @@ class BasicInfo(models.Model):
     employees = models.CharField(max_length=100, null=True)#员工人数
     main_business = models.CharField(max_length=100, null=True)#主要业务及产品
     business_scope = models.CharField(max_length=100, null=True)  # 经营范围
+
+    roe = models.FloatField(max_length=20, null=True) #净资产收益率ROE
+    dfql = models.FloatField(max_length=20, null=True) #权益乘数
+    efql = models.FloatField(max_length=20, null=True) #总资产周转率
+    ffql = models.FloatField(max_length=20, null=True) #净利润/营业总收入
+    gfql = models.FloatField(max_length=20, null=True) #净利润/利润总额
+    hfql = models.FloatField(max_length=20, null=True) #利润总额/息税前利润
+    ifql = models.FloatField(max_length=20, null=True) #应收账款
+    jfql = models.FloatField(max_length=20, null=True) #应收票据
+    kfql = models.FloatField(max_length=20, null=True) #2019净利润
+    lfql = models.FloatField(max_length=20, null=True) #2020 Q1净利润2
 
     def __str__(self):
         return self.code
@@ -62,8 +73,6 @@ class MyFavorite(models.Model):
     addtime = models.DateTimeField(auto_now_add=True, null=True)
     def __str__(self):
         return self.code
-
-
 
 
 class CCTVNews(models.Model):
