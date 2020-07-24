@@ -14,11 +14,11 @@ urlpatterns = [
     path('forcast/<perforType>', views.forcast, name='forcast'),
     path('addReason', views.addReason, name='addReason'),
     path('toaddreason', views.toAddReason, name='toaddreason'),
-    path('toreason', views.toreason, name='toreason'),
     path('tosearch', views.tosearch, name='tosearch'),
     path('search', views.search, name='search'),
     path('deleteMyfavorate', views.deleteMyfavorate, name='deleteMyfavorate'),
     path('cctvnews', views.cctvnews, name='cctvnews'),
     path('insertForcast', views.insertForcast, name='insertForcast'),
     path('readByline', views.readByline, name='readByline'),
+    path('insertRoe', views.insertRoe, name='insertRoe'),
 ]

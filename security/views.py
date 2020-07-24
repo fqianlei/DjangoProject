@@ -38,50 +38,40 @@ def forcast(request, perforType):
     page_obj = paginator.get_page(page_number)
     return render(request, 'focastlist.html', {'page_obj': page_obj, 'perforType': perforType})
 
-#def newfocast(request, perforType):
-
-
-
-
 def addReason(request):
     if len(request.POST['myReason'])>2:
         code = BasicInfo.objects.get(pk=str(request.POST['code']))
         myf = MyFavorite(code=code, myReason=request.POST['myReason'])
         myf.save()
-    forcasta = Forecast.objects.get(pk = str(request.POST['fid']))
-    forcasta.kanguo = '是'
-    forcasta.save()
+    if int(request.POST['fid'])!=99999:
+        forcasta = Forecast.objects.get(pk = str(request.POST['fid']))
+        forcasta.kanguo = '是'
+        forcasta.save()
     return HttpResponse("<script>alert('保存成功');window.opener=null;window.top.open('','_self','');window.close(this);</script>")
 
-
 def toAddReason(request):
-    return render(request, 'toaddreason.html')
-
+    return render(request, 'searchresult.html')
 
 def tosearch(request):
     return render(request, 'tosearch.html')
 
 def search(request):
-    basicinfo_list = BasicInfo.objects.filter(name__in=[request.POST['name']])
-    paginator = Paginator(basicinfo_list, 5)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-    return render(request, 'toaddreason.html', {'page_obj': page_obj})
+    #将字符串根据换行符切割为列表
+    listCode1 = request.POST['code'].split('\r\n')
+    listCode = []
+    for i in range(len(listCode1)):
+        if len(listCode1[i])==6:
+            listCode.append(listCode1[i])
+        else:
+            if len(listCode1[i])>2:
+                listCode.append(BasicInfo.objects.get(name = listCode1[i]))
+    basicinfo = BasicInfo.objects.filter(code__in=listCode)
+    return render(request, 'searchresult.html', {'basicinfo': basicinfo})
 
-
-def toreason(request):
-    #basicinfo_list = BasicInfo.objects.filter(code__in=[600066,300328])
-    f = MyFavorite.objects.values_list('code',flat=True)
-    basicinfo_list = BasicInfo.objects.filter(code__in=f)
-    paginator = Paginator(basicinfo_list, 7)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-    return render(request, 'toaddreason.html', {'page_obj': page_obj})
 
 def deleteMyfavorate(request):
     MyFavorite.objects.get(pk = request.POST['fid']).delete()
-    return HttpResponse()
-
+    return HttpResponse("<script>alert('删除成功');window.opener=null;window.top.open('','_self','');window.close(this);</script>")
 
 def cctvnews(request):
     yesterday = str(date.today() - datetime.timedelta(days=1)).replace('-', '')
@@ -137,14 +127,47 @@ def insertForcast(request):
                     with connection.cursor() as cursor:
                         cursor.execute('insert into security_forecast (annDate,code,name,trade,annPeriod,perforType,perforContent,changeReason,upperLimit,lowerLimit,addtime) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)',sheetForcast)
                         #cursor.execute('delete  from security_forecast where  code not in (select code from security_basicinfo)')
+                else:
+                    pass
+    print('本次共导入',daoruhang , '条业绩预告')
+    return HttpResponse("<script>alert('更新业绩预告成功');window.opener=null;window.top.open('','_self','');window.close(this);</script>")
+
+def insertRoe(request):
+    wb = openpyxl.load_workbook('D:\业绩预告.xlsx')
+    sheet = wb.worksheets[0]
+    rows = sheet.max_row
+    daoruhang = 0
+    for i in range(2, rows):
+        annDate = sheet['A' + str(i)].value
+        code = sheet['B' + str(i)].value
+        annPeriod = sheet['E' + str(i)].value
+        perforType = sheet['F' + str(i)].value
+        name = sheet['C' + str(i)].value
+        with connection.cursor() as cursor:
+            context_object_name = cursor.execute('select * from security_forecast where annDate=%s and code=%s and annPeriod=%s and perforType=%s',[annDate,code,annPeriod,perforType]).fetchone()
+            if context_object_name:
+                pass
+            else:
+                searchname = cursor.execute('select name from security_basicinfo where code=%s',[code]).fetchone()
+                if searchname:
+                    # cursor.execute('insert into security_basicinfo (code,name) VALUES (%s,%s)', [code,'test'])
+                    trade = sheet['D' + str(i)].value
+                    perforContent = sheet['G' + str(i)].value
+                    changeReason = sheet['H' + str(i)].value
+                    upperLimit = sheet['I' + str(i)].value
+                    lowerLimit = sheet['J' + str(i)].value
+                    sheetForcast = [annDate, code, name, trade, annPeriod, perforType, perforContent, changeReason,
+                                    upperLimit, lowerLimit, datetime.datetime.now()]
+                    daoruhang = daoruhang + 1
+                    with connection.cursor() as cursor:
+                        cursor.execute('insert into security_forecast (annDate,code,name,trade,annPeriod,perforType,perforContent,changeReason,upperLimit,lowerLimit,addtime) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)',sheetForcast)
+                        #cursor.execute('delete  from security_forecast where  code not in (select code from security_basicinfo)')
 
                 else:
                     pass
-
     print('本次共导入',daoruhang , '条业绩预告')
 
-#导入ROE等内容    """
-
+    # 导入ROE等内容
     wb = openpyxl.load_workbook('D:\ROE等导入.xlsx')
     sheet = wb.worksheets[0]
     rows = sheet.max_row
@@ -161,21 +184,33 @@ def insertForcast(request):
         jfql = sheet['J' + str(i)].value
         kfql = sheet['K' + str(i)].value
         lfql = sheet['L' + str(i)].value
+        mfql = sheet['M' + str(i)].value
+        nfql = sheet['N' + str(i)].value
+        ofql = sheet['O' + str(i)].value
+        pfql = sheet['P' + str(i)].value
+        qfql = sheet['Q' + str(i)].value
+        rfql = sheet['R' + str(i)].value
+        sfql = sheet['S' + str(i)].value
+        tfql = sheet['T' + str(i)].value
+        ufql = sheet['U' + str(i)].value
+        #print(code,":",rfql)
         daoruhang = daoruhang + 1
-        sheetForcast = [roe,dfql,efql,ffql,gfql,hfql,ifql,jfql,kfql,lfql,code]
+        sheetForcast = [roe,dfql,efql,ffql,gfql,hfql,ifql,jfql,kfql,lfql,mfql,nfql,ofql,pfql,qfql,rfql,sfql,tfql,ufql,code]
         with connection.cursor() as cursor:
-            cursor.execute('update security_basicinfo set roe=%s,dfql=%s,efql = %s,ffql = %s,gfql =%s,hfql =%s,ifql =%s,jfql =%s,kfql =%s,lfql =%s where code =%s',sheetForcast)
+            cursor.execute('''
+            update security_basicinfo set roe=%s,dfql=%s,efql = %s,ffql = %s,gfql =%s,hfql =%s,ifql =%s,jfql =%s,
+            kfql =%s,lfql =%s,mfql =%s,nfql =%s,ofql =%s,pfql =%s,qfql =%s,rfql =%s,sfql =%s,tfql =%s,ufql =%s  
+            where code =%s''',sheetForcast)
     print('本次更新',daoruhang , '条ROE信息')
+    return HttpResponse("<script>alert('更新业绩预告成功');window.opener=null;window.top.open('','_self','');window.close(this);</script>")
 
 
-    return HttpResponse("<script>alert('数据导入成功');window.opener=null;window.top.open('','_self','');window.close(this);</script>")
 
 def readByline(request):
-    with connection.cursor() as cursor:
-        context_object_name = cursor.execute('''select b.industry,b.code,b.name,b.webSite,m.myReason,m.addtime,b.area,b.city,b.market,b.list_date   from security_basicinfo b
-join security_myfavorite m on m.code=b.code
-order by b.industry,b.code''').fetchall()
-    context = {
-            'context_object_name': context_object_name,
-        }
-    return render(request, 'readByline.html', context)
+    all_mycode_list = BasicInfo.objects.raw('select * from security_basicinfo where code in (select code from security_myfavorite) order by sfql')
+    paginator = Paginator(all_mycode_list, 15)
+    #| date:"Y-m-d H:i:s"
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    return render(request, 'readByline.html', {'page_obj': page_obj,})
+

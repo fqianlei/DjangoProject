@@ -45,6 +45,15 @@ class BasicInfo(models.Model):
     jfql = models.FloatField(max_length=20, null=True) #应收票据
     kfql = models.FloatField(max_length=20, null=True) #2019净利润
     lfql = models.FloatField(max_length=20, null=True) #2020 Q1净利润2
+    mfql = models.FloatField(max_length=20, null=True)  # 2017营业收入
+    nfql = models.FloatField(max_length=20, null=True)  # 2018营业收入
+    ofql = models.FloatField(max_length=20, null=True)  # 2019营业收入
+    pfql = models.FloatField(max_length=20, null=True)  # 2017同比增长
+    qfql = models.FloatField(max_length=20, null=True)  # 2018同比增长
+    rfql = models.FloatField(max_length=20, null=True)  # 2019同比增长
+    sfql = models.FloatField(max_length=20, null=True)  # 动态市盈率
+    tfql = models.FloatField(max_length=20, null=True)  # 市净率
+    ufql = models.FloatField(max_length=20, null=True)  # 总市值
 
     def __str__(self):
         return self.code
