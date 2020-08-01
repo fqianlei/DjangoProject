@@ -2,7 +2,7 @@ from datetime import datetime
 from django.utils import timezone
 from django.db import models
 
-
+# py manage.py makemigrations security    py manage.py migrate
 # Create your models here.
 
 class BasicInfo(models.Model):
@@ -88,3 +88,18 @@ class CCTVNews(models.Model):
     date = models.CharField(max_length=200)
     title = models.CharField(max_length=200)
     content = models.CharField(max_length=5000)
+
+class Daily(models.Model):
+    code = models.ForeignKey(BasicInfo, on_delete=models.DO_NOTHING, null=True, db_column='code')
+    ts_code = models.CharField(max_length=200,null=True) # 股票代码
+    trade_date = models.CharField(max_length=200,null=True) #交易日期
+    open = models.FloatField(null=True)  # 应收账款
+    high = models.FloatField(null=True)  # 最高价
+    low = models.FloatField(null=True)  # 最低价
+    close = models.FloatField(null=True)  # 收盘价
+    pre_close = models.FloatField(null=True)  # 昨收价
+    change = models.FloatField(null=True)  # 涨跌额
+    pct_chg = models.FloatField(null=True)  # 涨跌幅 （未复权）
+    vol = models.FloatField(null=True)  # 成交量 （手）
+    amount = models.FloatField(null=True)  # 应成交额 （千元）
+

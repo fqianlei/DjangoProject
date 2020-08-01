@@ -36,7 +36,6 @@ def updateBasic(exchange):
     train_data = np.array(data)  # 先将数据框转换为数组
     train_data_list = train_data.tolist()  # 其次转换为列表
     for i in range(len(train_data_list)):
-
         c.execute('''
         update security_basicinfo set chairman=?,manager=?,secretary=?,reg_capital=?,setup_date=?,
         province=?,city=?,introduction=?,webSite=?,email=?,office=?,employees=?,main_business=?,business_scope=?  
