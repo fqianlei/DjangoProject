@@ -8,6 +8,7 @@ from security.models import BasicInfo, Forecast, MyFavorite,CCTVNews
 from django.core.paginator import Paginator
 import openpyxl
 import numpy as np
+import pandas
 
 # Create your views here.  m = MyFavorite.objects.values('code')
 #f = MyFavorite.objects.values_list('code',flat=True)
@@ -21,7 +22,8 @@ class IndexView(generic.ListView):
 def index(request):
     with connection.cursor() as cursor:
         context_object_name = cursor.execute('''select f.perforType,count(id),notkanguo.newp from security_forecast f
-                    left join (select ff.perforType,count(ff.id) newp from security_forecast ff where ff.kanguo is null group  by ff.perforType) notkanguo on notkanguo.perforType = f.perforType group by f.perforType''').fetchall()
+                    left join (select ff.perforType,count(ff.id) newp from security_forecast ff where ff.kanguo is null group  by ff.perforType) notkanguo 
+                    on notkanguo.perforType = f.perforType group by f.perforType''').fetchall()
     context = {
         'context_object_name': context_object_name,
     }
@@ -33,7 +35,6 @@ def forcast(request, perforType):
     all_forcast_list = Forecast.objects.raw('''select * from security_forecast f 
     where f.kanguo is null and perforType=%s order by f.annDate desc''',[perforType])
     paginator = Paginator(all_forcast_list, 15)
-
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     return render(request, 'focastlist.html', {'page_obj': page_obj, 'perforType': perforType})
@@ -62,10 +63,15 @@ def search(request):
     for i in range(len(listCode1)):
         if len(listCode1[i])==6:
             listCode.append(listCode1[i])
+            #取值包含证券市场的代码，如：000411.SZ
+        elif len(listCode1[i])==9:
+            listCode.append(listCode1[i][0:6])
+            print(listCode1[i][0:6])
         else:
             if len(listCode1[i])>2:
-                listCode.append(BasicInfo.objects.get(name = listCode1[i]))
-    basicinfo = BasicInfo.objects.filter(code__in=listCode)
+                if listCode.append(BasicInfo.objects.get(name = listCode1[i])):
+                    listCode.append(BasicInfo.objects.get(name=listCode1[i]))
+    basicinfo = BasicInfo.objects.filter(code__in=listCode).order_by('sfql')
     return render(request, 'searchresult.html', {'basicinfo': basicinfo})
 
 
@@ -92,7 +98,7 @@ def cctvnews(request):
                 cctv.save()
 
     cctvnews = CCTVNews.objects.all().order_by('-id')
-    paginator = Paginator(cctvnews, 4)
+    paginator = Paginator(cctvnews, 8)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     return render(request, 'cctvnews.html', {'page_obj': page_obj})
@@ -132,42 +138,9 @@ def insertForcast(request):
     print('本次共导入',daoruhang , '条业绩预告')
     return HttpResponse("<script>alert('更新业绩预告成功');window.opener=null;window.top.open('','_self','');window.close(this);</script>")
 
+#两个EXCEL，先导入业绩预告 ，再导入ROE等数据
 def insertRoe(request):
-    wb = openpyxl.load_workbook('D:\业绩预告.xlsx')
-    sheet = wb.worksheets[0]
-    rows = sheet.max_row
-    daoruhang = 0
-    for i in range(2, rows):
-        annDate = sheet['A' + str(i)].value
-        code = sheet['B' + str(i)].value
-        annPeriod = sheet['E' + str(i)].value
-        perforType = sheet['F' + str(i)].value
-        name = sheet['C' + str(i)].value
-        with connection.cursor() as cursor:
-            context_object_name = cursor.execute('select * from security_forecast where annDate=%s and code=%s and annPeriod=%s and perforType=%s',[annDate,code,annPeriod,perforType]).fetchone()
-            if context_object_name:
-                pass
-            else:
-                searchname = cursor.execute('select name from security_basicinfo where code=%s',[code]).fetchone()
-                if searchname:
-                    # cursor.execute('insert into security_basicinfo (code,name) VALUES (%s,%s)', [code,'test'])
-                    trade = sheet['D' + str(i)].value
-                    perforContent = sheet['G' + str(i)].value
-                    changeReason = sheet['H' + str(i)].value
-                    upperLimit = sheet['I' + str(i)].value
-                    lowerLimit = sheet['J' + str(i)].value
-                    sheetForcast = [annDate, code, name, trade, annPeriod, perforType, perforContent, changeReason,
-                                    upperLimit, lowerLimit, datetime.datetime.now()]
-                    daoruhang = daoruhang + 1
-                    with connection.cursor() as cursor:
-                        cursor.execute('insert into security_forecast (annDate,code,name,trade,annPeriod,perforType,perforContent,changeReason,upperLimit,lowerLimit,addtime) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)',sheetForcast)
-                        #cursor.execute('delete  from security_forecast where  code not in (select code from security_basicinfo)')
-
-                else:
-                    pass
-    print('本次共导入',daoruhang , '条业绩预告')
-
-    # 导入ROE等内容
+    # 导入ROE等内容，先删除股票名称，再全部复制粘贴EXCEL，主要是去除双引号
     wb = openpyxl.load_workbook('D:\ROE等导入.xlsx')
     sheet = wb.worksheets[0]
     rows = sheet.max_row
@@ -175,24 +148,24 @@ def insertRoe(request):
     for i in range(2, rows):
         code = sheet['B' + str(i)].value
         roe = sheet['C' + str(i)].value
-        dfql = sheet['D' + str(i)].value
-        efql = sheet['E' + str(i)].value
-        ffql = sheet['F' + str(i)].value
-        gfql = sheet['G' + str(i)].value
-        hfql = sheet['H' + str(i)].value
-        ifql = sheet['I' + str(i)].value
-        jfql = sheet['J' + str(i)].value
-        kfql = sheet['K' + str(i)].value
-        lfql = sheet['L' + str(i)].value
-        mfql = sheet['M' + str(i)].value
-        nfql = sheet['N' + str(i)].value
-        ofql = sheet['O' + str(i)].value
-        pfql = sheet['P' + str(i)].value
-        qfql = sheet['Q' + str(i)].value
-        rfql = sheet['R' + str(i)].value
-        sfql = sheet['S' + str(i)].value
-        tfql = sheet['T' + str(i)].value
-        ufql = sheet['U' + str(i)].value
+        dfql = sheet['D' + str(i)].value  #权益乘数
+        efql = sheet['E' + str(i)].value #总资产周转率
+        ffql = sheet['F' + str(i)].value #净利润/营业总收入
+        gfql = sheet['G' + str(i)].value #净利润/利润总额
+        hfql = sheet['H' + str(i)].value #利润总额/息税前利润
+        ifql = sheet['I' + str(i)].value #应收账款
+        jfql = sheet['J' + str(i)].value #应收票据
+        kfql = sheet['K' + str(i)].value #2019净利润
+        lfql = sheet['L' + str(i)].value #2020 半年报利润率
+        mfql = sheet['M' + str(i)].value # 2017营业收入
+        nfql = sheet['N' + str(i)].value  # 2018营业收入
+        ofql = sheet['O' + str(i)].value  # 2019营业收入
+        pfql = sheet['P' + str(i)].value # 2017同比增长
+        qfql = sheet['Q' + str(i)].value # 2018同比增长
+        rfql = sheet['R' + str(i)].value  # 2019同比增长
+        sfql = sheet['S' + str(i)].value # 动态市盈率
+        tfql = sheet['T' + str(i)].value # 市净率
+        ufql = sheet['U' + str(i)].value # 总市值
         #print(code,":",rfql)
         daoruhang = daoruhang + 1
         sheetForcast = [roe,dfql,efql,ffql,gfql,hfql,ifql,jfql,kfql,lfql,mfql,nfql,ofql,pfql,qfql,rfql,sfql,tfql,ufql,code]
@@ -202,7 +175,7 @@ def insertRoe(request):
             kfql =%s,lfql =%s,mfql =%s,nfql =%s,ofql =%s,pfql =%s,qfql =%s,rfql =%s,sfql =%s,tfql =%s,ufql =%s  
             where code =%s''',sheetForcast)
     print('本次更新',daoruhang , '条ROE信息')
-    return HttpResponse("<script>alert('更新业绩预告成功');window.opener=null;window.top.open('','_self','');window.close(this);</script>")
+    return HttpResponse("<script>alert('更新ROE信息成功');window.opener=null;window.top.open('','_self','');window.close(this);</script>")
 
 
 

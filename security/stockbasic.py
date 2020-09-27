@@ -9,7 +9,7 @@ import pandas as pd
 import sqlite3
 
 
-conn = sqlite3.connect('C:\DjangoProject\db.sqlite3')
+conn = sqlite3.connect('d:\DjangoProject\db.sqlite3')
 c = conn.cursor()
 c.execute("delete from security_basicinfo ")
 conn.commit()
