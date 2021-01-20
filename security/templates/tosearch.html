@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+<style type="text/css">
+    input{ height: 30px;padding: 0;outline: 0;margin-top: 35px;}
+</style>
+    <title>我的股票池</title>
+</head>
+<body>
+
+<div style="line-height: 100px;height: 100px;">
+<form action="search" method="post" >
+                股票代码<textarea rows="10" name="code"></textarea>{% csrf_token %}
+                   <input type="submit" value="提交">
+</form>
+</div>
+
+</body>
+</html>

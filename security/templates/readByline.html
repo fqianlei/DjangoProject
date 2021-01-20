@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>逐行看有入选原因的股票</title>
+</head>
+<body>
+    <table CELLPADDING="1" cellspacing="0" border="1">
+
+    {% for basicinfo in page_obj %}
+        <tr><th width="80">行业</th><td>{{ basicinfo.industry }}</td>
+            <th  width="80">股票代码</th><td><a href="http://{{ basicinfo.webSite }}" target="_blank">{{ basicinfo.code }}</a></td>
+            <th  width="80">股票名称</th><td><a href="http://guba.eastmoney.com/list,{{ basicinfo.code }}.html" target="_blank">{{ basicinfo.name }}</a></td>
+            <th  width="120">省份.城市</th><td><a href="http://so.eastmoney.com/web/s?keyword={{ basicinfo.code }}" target="_blank">{{ basicinfo.province }}.{{ basicinfo.city }}</a></td>
+            <th  width="80">板块</th> <td>{{ basicinfo.market }}</td>
+            <th  width="80">上市时间</th><td>{{ basicinfo.list_date }}</td>
+
+        </tr>
+        <tr>   <th width="8%">动态市盈率</th><td>{{ basicinfo.PE }}</td>
+                <th width="8%">市净率</th><td>{{ basicinfo.PB }}</td>
+                <th width="8%">总市值</th><td>{{ basicinfo.GMV }}</td>
+                <th width="8%">预留</th><td></td>
+                <th width="8%">预留</th><td></td>
+                <th width="8%"><a href="{% url 'security:zhibiao' basicinfo.code %}" target="_blank">财务数据</a></th><td>{{ forloop.counter }}</td>
+        </tr>
+         <tr><td width="8%">公司介绍</td><td  colspan="12">{{ basicinfo.introduction }}</td></tr>
+
+
+        <tr><th>报告年度</th><th colspan="6">预告内容</th><th colspan="5">报告原因</th></tr>
+            {% for forecast in basicinfo.forecast_set.all %}
+               <tr><td>{{ forecast.annPeriod }}</td>
+                   <td  colspan="6">{{ forecast.perforContent}}</td>
+                   <td  colspan="5">{{ forecast.changeReason}}</td>
+                </tr>
+            {% endfor %}
+
+
+
+        <tr><th  colspan="10">入选原因</th><th>添加时间</th><th>操作</th></tr>
+            {% for myfavorite in basicinfo.myfavorite_set.all %}
+               <tr><td  colspan="10" width="800">{{ myfavorite.myReason }}</td>
+                   <td width="200">{{ myfavorite.addtime | date:"Y-m-d H:i:s" }}</td>
+                    <td>
+                        <form action="{% url 'security:deleteMyfavorate' %}" method="post" id="form2" target="nm" >
+                            <input type="hidden"  name="fid" id="fid"  value="{{ myfavorite.id  }}">{% csrf_token %}
+                            <input type="submit" value="删除">
+                        </form>
+                    </td>
+               </tr>
+            {% endfor %}
+
+        <tr><td width="8%">新增原因：</td>
+            <td colspan="11">
+                <form action="{% url 'security:addReason' %}" method="post" id="form1" target="nm" >
+                    <input type="hidden" name="fid" id="fid"  value="99999">
+                    <input type="hidden" name="code" id="code"  value="{{ basicinfo.code  }}">{% csrf_token %}
+                    <input style="width: 600px"  type="text" name="myReason" id="myReason" value="">
+                    <input id="btn3" type="submit" value="提交">
+                </form>
+            </td>
+        </tr>
+         <tr><td colspan="12"><p style="color: chartreuse"> _________________________________________________________________________________</p></td></tr>
+    {% endfor %}
+    </table>
+
+
+
+<div class="pagination">
+    <span class="step-links">
+        {% if page_obj.has_previous %}
+            <a href="?page=1">&laquo; first</a>
+            <a href="?page={{ page_obj.previous_page_number }}">previous</a>
+        {% endif %}
+
+        <span class="current">
+            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+        </span>
+
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}">next</a>
+            <a href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
+        {% endif %}
+    </span>
+</div>
+
+
+    <script>
+        $("#btn3").on('click',function(){
+            $('body').append('<p class="tip">提交中</p>');
+            $('#form1').submit();
+        })
+    </script>
+</body>
+</html>

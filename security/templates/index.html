@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>投资理财导航页</title>
+</head>
+<body>
+<ul>
+<li><a href="{% url 'security:readByline' %}" target="_blank">逐行查看入选股票</a></li>
+    {% for perforType in context_object_name %}
+    <li><a href="{% url 'security:forcast' perforType.0 %}">{{ perforType.0 }}</a>&nbsp;总数：{{ perforType.1 }},剩余没看：{{ perforType.2 }},</li>
+    {% endfor %}
+<li><a href="{% url 'security:cctvnews'  %}" target="_blank">CCTV NEWS</a></li>
+<li><a href="{% url 'security:tosearch' %}" target="_blank">公司查询-包含预告和入选信息</a></li>
+<li><a href="{% url 'security:tosearch2' %}" target="_blank">公司查询-只包含财务信息</a></li>
+<li><a href="{% url 'security:tosearch3' %}" target="_blank">公司查询-适用于多公司对比最新财报</a></li>
+<li><a href="{% url 'security:insertForcast' %}" target="_blank">导入业绩预告数据</a></li>
+<li><a href="{% url 'security:insertRoe' %}" target="_blank">更新股票基本信息和ROE等动态数据</a></li>
+<li><a href="{% url 'security:insertAnndata' %}" target="_blank">插入财务数据</a></li>
+<li><a href="{% url 'security:printipv6' %}" target="_blank">IPV6地址</a></li>
+
+</ul>
+</body>
+</html>

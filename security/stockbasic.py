@@ -29,6 +29,7 @@ def insertBasic(exchange):
     conn.commit()
 
 insertBasic('SSE')
+
 insertBasic('SZSE')
 
 def updateBasic(exchange):
@@ -49,6 +50,5 @@ def updateBasic(exchange):
 
 updateBasic('SSE')
 updateBasic('SZSE')
-
 
 conn.close()

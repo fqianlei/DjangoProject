@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ perforType }}</title>
+</head>
+<body>
+    <a href="/security/">返回首页</a>
+    <table CELLPADDING="1" cellspacing="0" border="1">
+    {% for forcast in page_obj %}
+        <tr><th width="5%">公司网站</th><td  style="width: 100px"><a href="http://{{ forcast.code.webSite }}" target="_blank">{{ forcast.code.code  }}</a></td>
+        <th>证券名称</th><td style="width: 80px"><a href="http://guba.eastmoney.com/list,{{ forcast.code.code }}.html" target="_blank">{{ forcast.name }}</a></td>
+            <th width="5%">公告日期</th><td><a href="http://so.eastmoney.com/web/s?keyword={{ forcast.code.code }}" target="_blank">{{ forcast.annDate }}</a></td>
+            <th width="5%">行业</th><td> {{ forcast.trade }}</td>
+        <th width="5%">报告年度</th><td> {{ forcast.annPeriod }}</td>
+            <th width="5%">业绩类型</th><td width="15%"> {{ forcast.perforType }}</td></tr>
+        <tr><th>地域</th><td>{{ forcast.code.province }}.{{ forcast.code.city }}</td>
+            <th>市场类型</th><td>{{ forcast.code.market }}</td>
+            <th>经营范围</th><td colspan="7">{{ forcast.code.business_scope }}</td></tr>
+        <tr><th>公司介绍</th><td colspan="11">{{ forcast.code.introduction }}</td></tr>
+
+        <tr>   <th width="8%">动态市盈率</th><td>{{ forcast.code.PE }}</td>
+                <th width="8%">总市值</th><td>{{ forcast.code.GMV }}</td>
+                <th width="8%">市净率</th><td>{{ forcast.code.PB }}</td>
+                <th width="8%">预告时间</th><td>{{ forcast.annDate }}</td>
+                <th width="8%">上市日期</th><td>{{ forcast.code.list_date }}</td>
+                <th width="8%"><a href="{% url 'security:zhibiao' forcast.code.code %}" target="_blank">多周期财务数据</a></th><td><a href="{% url 'security:zhibiao2' forcast.code.code %}" target="_blank">单周期财务数据</a></td>
+        </tr>
+        <tr>
+            <th>营收增幅</th><td>{{ forcast.code.YOY }}</td>
+            <th>营业收入</th><td>{{ forcast.code.BI }}</td>
+            <th>营业利润</th><td>{{ forcast.code.OP }}</td>
+            <th>销售毛利率</th><td>{{ forcast.code.NPRA }}</td>
+            <th>销售净利率</th><td>{{ forcast.code.GPM }}</td>
+            <th>应收账款</th><td>{{ forcast.code.AR }}</td>
+        </tr>
+
+        <tr><th>预告内容</th><td colspan="11"> {{ forcast.perforContent }}</td></tr>
+        <tr><th>报告原因</th><td colspan="11"> {{ forcast.changeReason }}</td></tr>
+        <tr><th>历史原因</th><td colspan="11"> <table CELLPADDING="1" cellspacing="0" border="1">
+        <tr><td>新增原因</td><td>入选时间</td></tr>
+            {% for myfavorite in forcast.code.myfavorite_set.all %}
+                <tr><td width="800">{{ myfavorite.myReason }}</td><td width="200">{{ myfavorite.addtime | date:"Y-m-d H:i:s" }}</td></tr>
+            {% endfor %}
+            </table>
+        <tr>
+            <th>入选原因：</th><td  colspan="11"><form action="{% url 'security:addReason' %}" method="post" id="form1" target="nm" >
+    <input type="hidden" name="code" id="code"  value="{{ forcast.code.code  }}">{% csrf_token %}
+             <input type="hidden" name="fid" id="fid"  value="{{ forcast.id  }}">
+    <input style="width: 600px"  type="text" name="myReason" id="myReason" value="">
+    <input id="btn3" type="submit" value="提交">
+            </form>
+        </td>
+        </tr>
+        <tr><td colspan="12"><p style="color: chartreuse"> _________________________________________________________________________________</p></td></tr>
+    {% endfor %}
+    </table>
+<div class="pagination">
+    <span class="step-links">
+        {% if page_obj.has_previous %}
+            <a href="?page=1">&laquo; first</a>
+            <a href="?page={{ page_obj.previous_page_number }}">previous</a>
+        {% endif %}
+
+        <span class="current">
+            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+        </span>
+
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}">next</a>
+            <a href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
+        {% endif %}
+    </span>
+</div>
+
+    <script>
+        $("#btn3").on('click',function(){
+            $('body').append('<p class="tip">提交中</p>');
+            $('#form1').submit();
+        })
+    </script>
+
+
+</body>
+</html>

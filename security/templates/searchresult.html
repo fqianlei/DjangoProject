@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>我的股票池</title>
+</head>
+<body>
+   <table CELLPADDING="1" cellspacing="0" border="1">
+   {% for basicinfo in basicinfo %}
+        <tr>
+                <th width="8%">行业</th><td width="8%">{{ basicinfo.industry }}</td>
+            <th  width="8%">股票代码</th><td width="8%"><a href="http://{{ basicinfo.webSite }}" target="_blank">{{ basicinfo.code }}</a></td>
+                <th  width="8%">股票名称</th><td width="8%"><a href="http://guba.eastmoney.com/list,{{ basicinfo.code }}.html" target="_blank">{{ basicinfo.name }}</a></td>
+                <th  width="8%">省份.城市</th><td width="8%"><a href="http://so.eastmoney.com/web/s?keyword={{ basicinfo.code }}" target="_blank">{{ basicinfo.province }}.{{ basicinfo.city }}</a></td>
+            <th  width="8%">板块</th><td width="8%">{{ basicinfo.market }}</td>
+                <th  width="8%">上市时间</th><td width="8%">{{ basicinfo.list_date }}</td>
+        </tr>
+        <tr>
+                <th width="8%">动态市盈率</th><td>{{ basicinfo.PE }}</td>
+                <th width="8%">市净率</th><td>{{ basicinfo.PB }}</td>
+                <th width="8%">总市值</th><td>{{ basicinfo.GMV }}</td>
+                <th width="8%">预留</th><td></td>
+                <th width="8%"><a href="{% url 'security:zhibiao2' basicinfo.code %}" target="_blank">单周期财务数据</a></th><td></td>
+                <th width="8%"><a href="{% url 'security:zhibiao' basicinfo.code %}" target="_blank">财务数据</a></th><td>{{ forloop.counter }}</td>
+        </tr>
+        <tr>
+            <th>营收增幅</th><td>{{ basicinfo.YOY }}</td>
+            <th>营业收入</th><td>{{ basicinfo.BI }}</td>
+            <th>营业利润</th><td>{{ basicinfo.OP }}</td>
+            <th>销售毛利率</th><td>{{ basicinfo.NPRA }}</td>
+            <th>销售净利率</th><td>{{ basicinfo.GPM }}</td>
+            <th>预留</th><td></td>
+        </tr>
+        <tr><th width="8%">公司介绍</th><td  colspan="12">{{ basicinfo.introduction }}</td></tr>
+
+       <tr><th>报告年度</th><th colspan="6">预告内容</th><th colspan="5">报告原因</th></tr>
+            {% for forecast in basicinfo.forecast_set.all %}
+               <tr><td>{{ forecast.annPeriod }}</td>
+                   <td  colspan="6">{{ forecast.perforContent}}</td>
+                   <td  colspan="5">{{ forecast.changeReason}}</td>
+                </tr>
+            {% endfor %}
+
+       <tr><th  colspan="10">入选原因</th><th>添加时间</th><th>操作</th></tr>
+       {% for myfavorite in basicinfo.myfavorite_set.all %}
+           <tr><td  colspan="10">{{ myfavorite.myReason }}</td>
+               <td>{{ myfavorite.addtime | date:"Y-m-d H:i:s" }}</td>
+                <td>
+                    <form action="{% url 'security:deleteMyfavorate' %}" method="post" id="form2" target="nm" >
+                        <input type="hidden"  name="fid" id="fid"  value="{{ myfavorite.id  }}">{% csrf_token %}
+                        <input type="submit" value="删除">
+                    </form>
+                </td>
+           </tr>
+       {% endfor %}
+        <tr><th width="8%">新增原因：</th>
+            <td colspan="11">
+                <form action="{% url 'security:addReason' %}" method="post" id="form1" target="nm" >
+                    <input type="hidden" name="fid" id="fid"  value="99999">
+                    <input type="hidden" name="code" id="code"  value="{{ basicinfo.code  }}">{% csrf_token %}
+                    <input style="width: 600px"  type="text" name="myReason" id="myReason" value="">
+                    <input id="btn3" type="submit" value="提交">
+                </form>
+            </td>
+        </tr>
+        <tr><td colspan="12"><p style="color: chartreuse"> _________________________________________________________________________________</p></td></tr>
+   {% endfor %}
+    </table>
+
+    <script>
+        $("#btn3").on('click',function(){
+            $('body').append('<p class="tip">提交中</p>');
+            $('#form1').submit();
+        })
+    </script>
+
+</body>
+</html>
